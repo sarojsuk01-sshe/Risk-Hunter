@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Hunter: นักล่าความเสี่ยง</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Kanit:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Custom Styles -->
+    <style>
+        body { 
+            font-family: 'Inter', 'Kanit', sans-serif; 
+            background-color: #f4f7f6;
+        }
+        .loader {
+            border: 8px solid #f3f3f3; border-radius: 50%;
+            border-top: 8px solid #3b82f6; width: 60px; height: 60px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .disabled-button { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div id="app-container" class="relative bg-white w-full max-w-5xl mx-auto p-4 md:p-6 rounded-lg shadow-lg my-4 min-h-[95vh]">
+        
+        <!-- Welcome Screen Section -->
+        <div id="welcome-section" class="text-center py-8 md:py-12 px-4">
+            <div class="flex items-center justify-center gap-3 mb-2">
+                <svg class="h-12 w-12 text-green-700" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path fill-rule="evenodd" d="M12.516 2.17a.75.75_ 0 00-1.032 0L3.696 9.444a.75.75 0 00.516 1.286h1.517v6.02a.75.75 0 00.75.75h10.5a.75.75 0 00.75-.75v-6.02h1.517a.75.75 0 00.516-1.286L12.516 2.17zM11.25 18.75a.75.75 0 001.5 0v-6.02h-1.5v6.02z" clip-rule="evenodd" />
+                  <path d="M12 2.25a.75.75 0 00-1.06 0l-6.25 6.25a.75.75 0 000 1.06l6.25 6.25a.75.75 0 001.06 0l6.25-6.25a.75.75 0 000-1.06L12 2.25zM11.09 4.72a.75.75 0 011.06 0l5.47 5.47a.75.75 0 11-1.06 1.06L12 6.844l-4.53 4.53a.75.75 0 01-1.06-1.06l5.47-5.47z" />
+                  <path d="M12.007 2.1a.75.75 0 01.524.212l7.014 6.986a.75.75 0 01-.008 1.068l-7.014 6.986a.75.75 0 01-1.056 0l-7.014-6.986a.75.75 0 01-.008-1.068L11.483 2.312a.75.75 0 01.524-.212zM12 4.253L6.22 9.999l5.78 5.746L17.78 9.999 12 4.253z" transform="translate(0, 3)"/>
+                </svg>
+                <span class="text-4xl font-bold text-gray-800" style="font-family: 'Kanit', sans-serif;">Risk Hunter</span>
+            </div>
+            <p class="text-xl font-bold text-red-800 mb-6" style="font-family: 'Kanit', sans-serif;">นักล่าความเสี่ยงด้วยระบบปัญญาประดิษฐ์ (AI)</p>
+            <p id="welcome-user-message" class="text-lg text-gray-700 mb-8 font-semibold"></p>
+
+
+            <div class="max-w-2xl mx-auto bg-green-50 border-l-4 border-green-500 text-left p-6 rounded-lg mb-10 shadow-sm">
+                <h2 class="text-xl font-bold text-gray-800 mb-4" style="font-family: 'Kanit', sans-serif;">ขั้นตอนการใช้งาน:</h2>
+                <ol class="list-decimal list-inside space-y-2 text-gray-700">
+                    <li><strong>ลงทะเบียน (ครั้งแรก):</strong> กดปุ่ม 'ลงทะเบียน' เพื่อบันทึกชื่อและโครงการของคุณ</li>
+                    <li><strong>เริ่มต้น:</strong> กดปุ่ม 'เริ่มล่าความเสี่ยง' เพื่อเปิดกล้อง หรือ 'เลือกภาพ'</li>
+                    <li><strong>วิเคราะห์:</strong> AI จะตรวจจับความเสี่ยงและแสดงผล</li>
+                    <li><strong>บันทึก:</strong> กรอกรายละเอียดการแก้ไขและบันทึกรายงาน</li>
+                </ol>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <button id="start-inspection-btn" class="bg-green-700 hover:bg-green-800 text-white font-bold py-4 px-8 rounded-lg text-xl inline-flex items-center gap-3 transition duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 w-full sm:w-auto">
+                    <svg class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 9a3 3 0 100 6 3 3 0 000-6z" />
+                        <path fill-rule="evenodd" d="M9.344 3.071a49.52 49.52 0 015.312 0c.967.052 1.83.585 2.332 1.39l.821 1.317c.24.383.645.643 1.11.71.386.054.77.113 1.152.177 1.432.239 2.429 1.493 2.429 2.949V18a2.25 2.25 0 01-2.25 2.25h-13.5A2.25 2.25 0 013 18V9.673c0-1.456.997-2.71 2.43-2.949.382-.064.766-.123 1.151-.178a1.56 1.56 0 001.11-.71l.822-1.315a2.942 2.942 0 012.332-1.39zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" clip-rule="evenodd" />
+                    </svg>
+                    <span style="font-family: 'Kanit', sans-serif;">เริ่มล่าความเสี่ยง</span>
+                </button>
+                <button id="select-image-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg text-xl inline-flex items-center gap-3 transition duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 w-full sm:w-auto">
+                    <svg class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                    </svg>
+                    <span style="font-family: 'Kanit', sans-serif;">เลือกภาพจากอุปกรณ์</span>
+                </button>
+            </div>
+             <div class="mt-6">
+                <button id="register-btn" class="text-gray-600 hover:text-blue-600 font-semibold py-2 px-4 rounded-lg transition duration-300 underline">
+                    ลงทะเบียน / แก้ไขข้อมูลผู้ตรวจสอบ
+                </button>
+            </div>
+            <input type="file" id="image-input" class="hidden" accept="image/*">
+        </div>
+
+        <!-- Main Content Area - Initially hidden -->
+        <div id="main-content" class="hidden">
+            <div class="text-center border-b border-gray-300 pb-4 mb-6">
+                <h1 class="text-3xl md:text-4xl font-bold text-green-900">Risk Hunter: นักล่าความเสี่ยง</h1>
+                <p class="text-gray-700 mt-2 text-lg">วิเคราะห์และจัดการความเสี่ยงจากภาพถ่าย</p>
+            </div>
+            <!-- Report Form Section -->
+            <div id="report-form-section">
+                <!-- Camera View Section -->
+                <div id="camera-view-section" class="hidden text-center my-6">
+                    <h2 id="camera-header" class="text-2xl font-bold text-gray-800 mb-4">โหมดถ่ายภาพ</h2>
+                    <div class="relative">
+                        <video id="video" class="w-full h-auto bg-black rounded-lg mb-4" playsinline></video>
+                    </div>
+                    <div class="flex justify-center gap-4">
+                        <button id="camera-cancel-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg">ยกเลิก</button>
+                        <button id="capture-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg">ถ่ายภาพ</button>
+                    </div>
+                </div>
+
+                <!-- Preview Section -->
+                <div id="preview-section" class="hidden text-center my-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">ตัวอย่างสำหรับวิเคราะห์</h2>
+                    <img id="preview-image" class="max-w-full h-auto mx-auto rounded-lg shadow-md mb-6" style="max-height: 50vh;">
+                    
+                    <div class="max-w-2xl mx-auto my-6 space-y-4 text-left p-4 border bg-gray-50 rounded-lg shadow-sm">
+                        <h3 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">รายละเอียดการตรวจสอบ</h3>
+                        <div>
+                            <label for="inspector-name" class="block text-sm font-medium text-gray-700 mb-1">ชื่อผู้ตรวจสอบ</label>
+                            <input type="text" id="inspector-name" class="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-100" placeholder="กรุณาลงทะเบียนก่อน" readonly>
+                        </div>
+                        <div>
+                            <label for="project-name" class="block text-sm font-medium text-gray-700 mb-1">ชื่อโครงการ/ไซต์งาน</label>
+                             <select id="project-name" class="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white">
+                                 <option value="" disabled selected>กำลังโหลดโครงการ...</option>
+                             </select>
+                        </div>
+                        <div>
+                            <label for="work-type" class="block text-sm font-medium text-gray-700 mb-1">ประเภทของงานที่กำลังทำ</label>
+                            <input type="text" id="work-type" class="w-full p-2 border border-gray-300 rounded-lg shadow-sm" placeholder="เช่น งานที่สูง, งานเชื่อม">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center gap-4">
+                        <button id="preview-cancel-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg">ยกเลิก</button>
+                        <button id="analyze-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg">ส่งเพื่อวิเคราะห์</button>
+                    </div>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div id="loader" class="hidden text-center my-8">
+                    <div class="loader mx-auto"></div>
+                    <p id="loader-text" class="text-gray-600 mt-4 text-lg">AI กำลังวิเคราะห์... กรุณารอสักครู่</p>
+                </div>
+
+                <!-- Result Display Section -->
+                <div id="result-section" class="hidden mt-6 p-4 md:p-6 bg-gray-50 rounded-lg shadow-inner">
+                    <!-- Report Header -->
+                    <div id="report-header" class="border-b pb-4 mb-6 hidden">
+                        <h2 id="report-title" class="text-2xl md:text-3xl font-bold text-gray-800 mb-4"></h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-gray-700">
+                            <div><strong>โครงการ:</strong> <span id="report-project-name"></span></div>
+                            <div><strong>ผู้ตรวจสอบ:</strong> <span id="report-inspector-name"></span></div>
+                            <div><strong>วันที่:</strong> <span id="report-date"></span></div>
+                            <div><strong>ประเภทของเหตุการณ์ (AI):</strong> <span id="report-event-type"></span></div>
+                            <div class="flex items-center gap-2 hidden">
+                                <label for="report-status" class="font-bold">สถานะ:</label>
+                                <select id="report-status" class="p-1 border border-gray-300 rounded-md bg-white shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="Open">Open</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Closed">Closed</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Images Section -->
+                    <div class="mb-4">
+                        <div class="max-w-md mx-auto text-center">
+                            <h3 class="font-bold text-lg mb-2 text-gray-800">ภาพความเสี่ยง</h3>
+                            <img id="analyzed-image" class="w-full h-auto object-cover rounded-lg shadow-md border">
+                        </div>
+                    </div>
+                    
+                    <!-- Risks Table -->
+                    <div id="risks-table-container" class="mb-8">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-lg text-gray-800">รายการความเสี่ยงที่พบ</h3>
+                            <button id="show-urgent-action-btn" class="hidden bg-red-600 hover:bg-red-700 text-white font-semibold py-1.5 px-4 rounded-lg text-sm inline-flex items-center gap-2 transition-opacity duration-300">
+                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                                </svg>
+                                ดูสิ่งที่ต้องทำเร่งด่วน
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto bg-white rounded-lg shadow">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">รายละเอียด</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">ประเภท</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">มาตรการป้องกัน</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="risks-table-body" class="bg-white divide-y divide-gray-200">
+                                    <!-- Rows will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Corrective Action Section -->
+                    <div id="corrective-action-section" class="hidden mt-6 pt-4 border-t">
+                        <h3 class="text-lg font-bold text-gray-800 mb-3">การดำเนินการแก้ไขและยืนยันประเภทเหตุการณ์</h3>
+                        
+                        <!-- Event Type Confirmation -->
+                        <div id="event-type-section" class="my-4 p-3 border rounded-lg bg-white shadow-sm">
+                            <label class="block text-sm font-semibold text-gray-800 mb-2">กรุณายืนยันประเภทของเหตุการณ์<span class="text-red-500">*</span></label>
+                            <div class="flex flex-wrap gap-x-4 gap-y-1">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="event-type" value="UA" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500">
+                                    <span class="text-sm text-gray-700">UA (Unsafe Action)</span>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="event-type" value="UC" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500">
+                                    <span class="text-sm text-gray-700">UC (Unsafe Condition)</span>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="event-type" value="Near Miss" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500">
+                                    <span class="text-sm text-gray-700">Near Miss</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Action Details -->
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <div class="mb-3">
+                                <label for="action-description" class="block text-sm font-medium text-gray-700 mb-1">รายละเอียดการแก้ไข:<span class="text-red-500">*</span></label>
+                                <textarea id="action-description" rows="2" class="w-full p-2 border border-gray-300 rounded-lg shadow-sm text-sm" placeholder="เช่น ได้แจ้งหัวหน้างานแล้ว, ได้ย้ายสิ่งกีดขวางออกแล้ว"></textarea>
+                            </div>
+
+                            <p class="text-sm font-medium text-gray-700 mb-1.5">แนบภาพการแก้ไข:</p>
+                            <div class="flex items-center space-x-2">
+                                <button id="take-action-photo-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1.5 px-3 text-sm rounded-lg shadow">ถ่ายภาพการแก้ไข</button>
+                            </div>
+                            <div id="action-photo-preview" class="mt-2">
+                                <img id="action-photo-preview-img" class="h-20 w-auto rounded-lg border hidden">
+                                <p id="no-action-photo-text" class="text-xs text-gray-500">ยังไม่มีภาพการแก้ไข</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="action-buttons" class="mt-8 flex flex-col md:flex-row justify-center gap-4">
+                        <button id="cancel-home-btn" class="w-full md:w-auto bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg">ยกเลิก</button>
+                        <button id="save-report-btn" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg">ยืนยันและบันทึก</button>
+                    </div>
+                    <div id="post-save-buttons" class="hidden mt-8 flex flex-col md:flex-row justify-center gap-4">
+                        <button id="new-report-btn" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg">เริ่มรายงานใหม่</button>
+                    </div>
+                </div>
+                
+                <!-- Action Camera View Section -->
+                <div id="action-camera-view-section" class="hidden text-center my-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">ถ่ายภาพการแก้ไข</h2>
+                    <video id="action-video" class="w-full h-auto bg-black rounded-lg mb-4" playsinline></video>
+                    <div class="flex justify-center gap-4"><button id="action-camera-cancel-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg">ยกเลิก</button><button id="action-capture-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-lg">ถ่ายภาพ</button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="custom-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4"><div class="bg-white rounded-lg shadow-xl p-6 max-w-sm mx-auto w-full"><h3 id="modal-title" class="text-lg font-bold mb-4"></h3><div id="modal-body"></div><div class="mt-6 text-right"><button id="modal-close-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg">ตกลง</button></div></div></div>
+    
+    <div id="registration-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md mx-auto w-full">
+            <h3 class="text-xl font-bold mb-4">ข้อมูลผู้ตรวจสอบ</h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="reg-first-name" class="block text-sm font-medium text-gray-700">ชื่อจริง<span class="text-red-500">*</span></label>
+                    <input type="text" id="reg-first-name" class="mt-1 w-full p-2 border border-gray-300 rounded-lg" placeholder="เช่น สมชาย">
+                </div>
+                <div>
+                    <label for="reg-last-name" class="block text-sm font-medium text-gray-700">นามสกุล<span class="text-red-500">*</span></label>
+                    <input type="text" id="reg-last-name" class="mt-1 w-full p-2 border border-gray-300 rounded-lg" placeholder="เช่น ใจดี">
+                </div>
+                <div>
+                    <label for="reg-project-name" class="block text-sm font-medium text-gray-700">โครงการ/ไซต์งาน<span class="text-red-500">*</span></label>
+                    <select id="reg-project-name" class="mt-1 w-full p-2 border border-gray-300 rounded-lg bg-white">
+                        <option value="" disabled selected>กำลังโหลด...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-4">
+                <button id="reg-cancel-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg">ยกเลิก</button>
+                <button id="reg-save-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg">บันทึกข้อมูล</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-risk-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4"><div class="bg-white rounded-lg shadow-xl p-6 max-w-lg mx-auto w-full"><h3 class="text-xl font-bold mb-4">แก้ไขการประเมินความเสี่ยง</h3><p id="editing-risk-description" class="text-gray-600 mb-4 p-2 bg-gray-100 rounded"></p><div class="grid md:grid-cols-2 gap-4"><div><label for="edit-likelihood" class="block text-sm font-medium">โอกาสเกิด (1-5)</label><input type="number" id="edit-likelihood" min="1" max="5" class="mt-1 w-full p-2 border rounded-lg"></div><div><label for="edit-severity" class="block text-sm font-medium">ความรุนแรง (1-5)</label><input type="number" id="edit-severity" min="1" max="5" class="mt-1 w-full p-2 border rounded-lg"></div></div><div class="mt-4"><label for="edit-reason" class="block text-sm font-medium">เหตุผลในการแก้ไข</label><textarea id="edit-reason" rows="3" class="mt-1 w-full p-2 border rounded-lg"></textarea></div><div class="mt-6 flex justify-end gap-4"><button id="edit-modal-cancel-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg">ยกเลิก</button><button id="edit-modal-save-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg">บันทึก</button></div></div></div>
+    
+    <div id="urgent-action-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-2xl p-8 max-w-xl mx-auto w-full">
+            <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-red-100 mb-5">
+                <svg class="h-12 w-12 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-3 text-center">แก้ไขสิ่งที่ต้องทำเร่งด่วน</h3>
+            <div class="text-left mb-6 p-4 bg-red-50 rounded-lg shadow-inner space-y-3">
+                <div>
+                    <label for="urgent-reason-edit" class="block text-sm font-semibold text-gray-800 mb-1">อันตรายที่ตรวจพบ:</label>
+                    <textarea id="urgent-reason-edit" rows="1" class="w-full p-2 border border-gray-300 rounded-lg shadow-sm text-sm overflow-y-hidden" style="resize: none;"></textarea>
+                </div>
+                <div>
+                    <label for="urgent-action-edit" class="block text-sm font-semibold text-gray-800 mb-1">สิ่งที่ต้องทำ (แต่ละบรรทัดคือ 1 รายการ):</label>
+                    <textarea id="urgent-action-edit" rows="1" class="w-full p-2 border border-gray-300 rounded-lg shadow-sm text-sm overflow-y-hidden" style="resize: none;"></textarea>
+                </div>
+            </div>
+            <div class="flex justify-center">
+                <button id="urgent-action-save-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-10 rounded-lg text-lg">ยืนยันการแก้ไขและรับทราบ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+        // --- State and Global References ---
+        let currentMediaBlob = null, currentActionImageBlob = null, allRisksData = [], editingRiskIndex = -1;
+        let db, auth, storage, userId, appId;
+        
+        // --- Element References ---
+        const el = {
+            welcomeSection: document.getElementById('welcome-section'),
+            welcomeUserMessage: document.getElementById('welcome-user-message'),
+            mainContent: document.getElementById('main-content'),
+            cameraView: document.getElementById('camera-view-section'),
+            preview: document.getElementById('preview-section'),
+            result: document.getElementById('result-section'),
+            actionCameraView: document.getElementById('action-camera-view-section'),
+            loader: document.getElementById('loader'),
+            inspectorName: document.getElementById('inspector-name'),
+            projectName: document.getElementById('project-name'),
+            workType: document.getElementById('work-type'),
+            startInspectionBtn: document.getElementById('start-inspection-btn'),
+            selectImageBtn: document.getElementById('select-image-btn'),
+            imageInput: document.getElementById('image-input'),
+            registerBtn: document.getElementById('register-btn'),
+            analyzeBtn: document.getElementById('analyze-btn'),
+            saveReportBtn: document.getElementById('save-report-btn'),
+            newReportBtn: document.getElementById('new-report-btn'),
+            cancelHomeBtn: document.getElementById('cancel-home-btn'),
+            actionButtons: document.getElementById('action-buttons'),
+            postSaveButtons: document.getElementById('post-save-buttons'),
+            video: document.getElementById('video'),
+            captureBtn: document.getElementById('capture-btn'),
+            cameraCancelBtn: document.getElementById('camera-cancel-btn'),
+            previewImage: document.getElementById('preview-image'),
+            analyzedImage: document.getElementById('analyzed-image'),
+            actionDescription: document.getElementById('action-description'),
+            showUrgentActionBtn: document.getElementById('show-urgent-action-btn'),
+            // NEW UI elements
+            reportTitle: document.getElementById('report-title'),
+            reportProjectName: document.getElementById('report-project-name'),
+            reportInspectorName: document.getElementById('report-inspector-name'),
+            reportDate: document.getElementById('report-date'),
+            reportEventType: document.getElementById('report-event-type'),
+            reportStatus: document.getElementById('report-status'),
+            risksTableBody: document.getElementById('risks-table-body'),
+            actionPhotoPreviewImg: document.getElementById('action-photo-preview-img'),
+            noActionPhotoText: document.getElementById('no-action-photo-text'),
+            correctiveActionSection: document.getElementById('corrective-action-section'),
+            eventTypeSection: document.getElementById('event-type-section'),
+            modal: {
+                custom: document.getElementById('custom-modal'), title: document.getElementById('modal-title'), body: document.getElementById('modal-body'), closeBtn: document.getElementById('modal-close-btn'),
+                registration: document.getElementById('registration-modal'),
+                regFirstName: document.getElementById('reg-first-name'),
+                regLastName: document.getElementById('reg-last-name'),
+                regProjectName: document.getElementById('reg-project-name'),
+                regSaveBtn: document.getElementById('reg-save-btn'),
+                regCancelBtn: document.getElementById('reg-cancel-btn'),
+                editRisk: document.getElementById('edit-risk-modal'), editDesc: document.getElementById('editing-risk-description'), editL: document.getElementById('edit-likelihood'), editS: document.getElementById('edit-severity'), editReason: document.getElementById('edit-reason'), editCancel: document.getElementById('edit-modal-cancel-btn'), editSave: document.getElementById('edit-modal-save-btn'),
+                urgentAction: document.getElementById('urgent-action-modal'),
+                urgentReasonEdit: document.getElementById('urgent-reason-edit'),
+                urgentActionEdit: document.getElementById('urgent-action-edit'),
+                urgentActionSaveBtn: document.getElementById('urgent-action-save-btn')
+            }
+        };
+
+        // --- Risk Matrix Logic ---
+        const riskMatrix = {
+            levels: { 
+                'สูงมาก': { icon: '⚫️', color: 'black', bgColor: 'bg-black', textColor: 'text-white', badgeClasses: 'bg-gray-800 text-white' }, 
+                'สูง': { icon: '🔴', color: 'red', bgColor: 'bg-red-600', textColor: 'text-white', badgeClasses: 'bg-red-100 text-red-800' }, 
+                'ปานกลาง': { icon: '🟠', color: 'orange', bgColor: 'bg-orange-500', textColor: 'text-white', badgeClasses: 'bg-orange-100 text-orange-800' }, 
+                'ต่ำ': { icon: '🟡', color: 'yellow', bgColor: 'bg-yellow-400', textColor: 'text-gray-800', badgeClasses: 'bg-yellow-100 text-yellow-800' } 
+            },
+            categoryLevels: {
+                'PPE (อุปกรณ์ป้องกันส่วนบุคคล)': 'ปานกลาง', 'Housekeeping (ความสะอาดและเป็นระเบียบ)': 'ต่ำ', 'Work at Height (การทำงานที่สูง)': 'สูง',
+                'Lifting Operations (การยกของหนัก)': 'สูง', 'Traffic & Vehicle Safety (ความปลอดภัยของยานพาหนะ)': 'สูง', 'Fire Safety (ความปลอดภัยจากอัคคีภัย)': 'สูง',
+                'Chemical Safety (ความปลอดภัยของสารเคมี)': 'สูง', 'Tool & Equipment Safety (ความปลอดภัยของเครื่องมือ)': 'ปานกลาง', 'Permit to Work (ใบอนุญาตทำงาน - PTW)': 'สูง',
+                'Emergency Preparedness (การเตรียมพร้อมรับเหตุฉุกเฉิน)': 'ปานกลาง'
+            },
+            getLevelFromScore: (s) => { if (s >= 17) return 'สูงมาก'; if (s >= 10) return 'สูง'; if (s >= 5) return 'ปานกลาง'; return 'ต่ำ'; },
+            getRiskLevel: function(risk) {
+                const categoryLevel = this.categoryLevels[risk.classification];
+                if (categoryLevel) return categoryLevel;
+                return this.getLevelFromScore(risk.score);
+            }
+        };
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', initializeAppAndAuth);
+
+        async function initializeAppAndAuth() {
+            try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyAwkmXYR42wKAvB7mU959N1meUBiakr7ck",
+                    authDomain: "risk-hunter-app-official.firebaseapp.com",
+                    projectId: "risk-hunter-app-official",
+                    storageBucket: "risk-hunter-app-official.firebasestorage.app",
+                    messagingSenderId: "875985770569",
+                    appId: "1:875985770569:web:a2845d7c9e71a84f5f8798"
+                };
+                
+                if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("YOUR")) {
+                    showModal("Firebase Error", "<p>กรุณานำ firebaseConfig จากโปรเจกต์ของคุณมาใส่ในโค้ด</p>");
+                    return;
+                }
+                
+                appId = firebaseConfig.projectId;
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                storage = getStorage(app);
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        setupUIEventListeners();
+                        await fetchProjects();
+                        loadUserInfo();
+                        resetForm(); 
+                    } else {
+                        userId = null;
+                    }
+                });
+                await signInAnonymously(auth);
+            } catch (e) {
+                console.error("Firebase initialization failed:", e);
+                showModal("Firebase Error", `<p>ไม่สามารถเชื่อมต่อฐานข้อมูลได้: ${e.message}</p>`);
+            }
+        }
+        
+        // --- UI and Navigation ---
+        function autoResizeTextarea(textarea) {
+            textarea.style.height = 'auto'; // Reset height to recalculate
+            textarea.style.height = (textarea.scrollHeight) + 'px'; // Set to content height
+        }
+
+        function setupUIEventListeners() {
+            [el.projectName, el.workType].forEach(input => input.addEventListener('input', checkPreviewInputsAndToggleButtonState));
+            
+            el.startInspectionBtn.addEventListener('click', () => {
+                if (!localStorage.getItem('riskHunterUser')) {
+                    showModal('กรุณาลงทะเบียน', '<p>กรุณาลงทะเบียนข้อมูลผู้ตรวจสอบก่อนเริ่มใช้งาน</p>');
+                    openRegistrationModal();
+                    return;
+                }
+                showView(el.mainContent);
+                openCamera(false);
+            });
+            
+            el.selectImageBtn.addEventListener('click', () => {
+                 if (!localStorage.getItem('riskHunterUser')) {
+                    showModal('กรุณาลงทะเบียน', '<p>กรุณาลงทะเบียนข้อมูลผู้ตรวจสอบก่อนเลือกรูปภาพ</p>');
+                    openRegistrationModal();
+                    return;
+                }
+                el.imageInput.click();
+            });
+
+            el.registerBtn.addEventListener('click', openRegistrationModal);
+            el.imageInput.addEventListener('change', handleImageSelection);
+            el.captureBtn.addEventListener('click', () => captureImage(false));
+            el.cameraCancelBtn.addEventListener('click', () => { stopCamera(false); resetForm(); });
+            document.getElementById('preview-cancel-btn').addEventListener('click', () => { stopCamera(false); resetForm(); });
+            el.analyzeBtn.addEventListener('click', analyzeMedia);
+            document.getElementById('take-action-photo-btn').addEventListener('click', () => openCamera(true));
+            document.getElementById('action-capture-btn').addEventListener('click', () => captureImage(true));
+            document.getElementById('action-camera-cancel-btn').addEventListener('click', () => { stopCamera(true); showSubView(el.result); });
+            el.newReportBtn.addEventListener('click', resetForm);
+            el.cancelHomeBtn.addEventListener('click', resetForm);
+            el.saveReportBtn.addEventListener('click', saveReport);
+            el.modal.closeBtn.addEventListener('click', () => hideModal(el.modal.custom));
+            el.modal.regSaveBtn.addEventListener('click', saveUserInfo);
+            el.modal.regCancelBtn.addEventListener('click', () => hideModal(el.modal.registration));
+            el.modal.editCancel.addEventListener('click', () => hideModal(el.modal.editRisk));
+            el.modal.urgentActionSaveBtn.addEventListener('click', saveUrgentActionEdits);
+            el.modal.editSave.addEventListener('click', saveRiskEdit);
+
+            // Add auto-resize listeners
+            el.modal.urgentReasonEdit.addEventListener('input', () => autoResizeTextarea(el.modal.urgentReasonEdit));
+            el.modal.urgentActionEdit.addEventListener('input', () => autoResizeTextarea(el.modal.urgentActionEdit));
+
+            el.showUrgentActionBtn.addEventListener('click', () => {
+                if(allRisksData && allRisksData.length > 0) {
+                    const featuredRisk = allRisksData[0];
+                    showUrgentActionModal(featuredRisk.initial_action_suggestion, featuredRisk.risk_reasoning);
+                }
+            });
+        }
+        
+        // --- User Registration and Data ---
+        function loadUserInfo() {
+            const userDataString = localStorage.getItem('riskHunterUser');
+            if (userDataString) {
+                const userData = JSON.parse(userDataString);
+                el.inspectorName.value = userData.fullName || '';
+                el.projectName.value = userData.project || '';
+                el.welcomeUserMessage.textContent = `ยินดีต้อนรับ, ${userData.fullName}`;
+                el.welcomeUserMessage.classList.remove('hidden');
+            } else {
+                 el.welcomeUserMessage.textContent = 'กรุณาลงทะเบียนเพื่อเริ่มใช้งาน';
+                 el.inspectorName.value = '';
+                 el.projectName.value = '';
+            }
+             checkPreviewInputsAndToggleButtonState();
+        }
+
+        function openRegistrationModal() {
+            const userDataString = localStorage.getItem('riskHunterUser');
+            if (userDataString) {
+                const userData = JSON.parse(userDataString);
+                el.modal.regFirstName.value = userData.firstName || '';
+                el.modal.regLastName.value = userData.lastName || '';
+                el.modal.regProjectName.value = userData.project || '';
+            } else {
+                 el.modal.regFirstName.value = '';
+                 el.modal.regLastName.value = '';
+                 el.modal.regProjectName.value = '';
+            }
+            hideModal(el.modal.custom); // Hide any other open modal
+            el.modal.registration.classList.remove('hidden');
+            el.modal.registration.classList.add('flex');
+        }
+
+        function saveUserInfo() {
+            const firstName = el.modal.regFirstName.value.trim();
+            const lastName = el.modal.regLastName.value.trim();
+            const project = el.modal.regProjectName.value;
+
+            if (!firstName || !lastName || !project) {
+                showModal('ข้อมูลไม่ครบถ้วน', '<p>กรุณากรอกชื่อ, นามสกุล, และเลือกโครงการให้ครบถ้วน</p>');
+                return;
+            }
+
+            const userData = {
+                firstName: firstName,
+                lastName: lastName,
+                fullName: `${firstName} ${lastName}`,
+                project: project
+            };
+
+            localStorage.setItem('riskHunterUser', JSON.stringify(userData));
+            loadUserInfo(); // Reload info to update UI
+            hideModal(el.modal.registration);
+            showModal('บันทึกสำเร็จ', '<p>ข้อมูลของคุณถูกบันทึกเรียบร้อยแล้ว</p>');
+        }
+
+
+        function handleImageSelection(event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                currentMediaBlob = file; 
+                el.previewImage.src = URL.createObjectURL(file);
+                el.previewImage.classList.remove('hidden');
+                
+                showView(el.mainContent);
+                showSubView(el.preview);
+                checkPreviewInputsAndToggleButtonState();
+            } else if (file) {
+                showModal('ไฟล์ไม่ถูกต้อง', '<p>กรุณาเลือกไฟล์รูปภาพเท่านั้น (เช่น .jpg, .png)</p>');
+            }
+            event.target.value = null; 
+        }
+
+        function showModal(title, body) { 
+            el.modal.title.textContent = title; 
+            el.modal.body.innerHTML = body;
+            el.modal.custom.classList.remove('hidden'); 
+            el.modal.custom.classList.add('flex'); 
+        }
+
+        function hideModal(modalElement) { modalElement.classList.add('hidden'); modalElement.classList.remove('flex'); }
+
+        function checkPreviewInputsAndToggleButtonState() {
+            const areInputsFilled = el.inspectorName.value.trim() && el.projectName.value && el.workType.value.trim();
+            el.analyzeBtn.classList.toggle('disabled-button', !areInputsFilled);
+            el.analyzeBtn.disabled = !areInputsFilled;
+            return areInputsFilled;
+        }
+
+        function showView(viewToShow) {
+            [el.welcomeSection, el.mainContent].forEach(v => v.classList.add('hidden'));
+            if(viewToShow) viewToShow.classList.remove('hidden');
+        }
+
+        function showSubView(viewToShow) {
+            [el.cameraView, el.preview, el.result, el.loader, el.actionCameraView].forEach(v => v.classList.add('hidden'));
+            if (viewToShow) viewToShow.classList.remove('hidden');
+        }
+
+        function resetForm() {
+            currentMediaBlob = null; currentActionImageBlob = null; allRisksData = []; editingRiskIndex = -1;
+            el.workType.value = '';
+            el.actionDescription.value = '';
+            
+            loadUserInfo(); // Reload user data instead of clearing it
+
+            document.querySelectorAll('input[name="event-type"]').forEach(radio => radio.checked = false);
+            [el.previewImage, el.analyzedImage, el.actionPhotoPreviewImg].forEach(img => { img.src = ''; img.classList.add('hidden'); });
+            
+            el.risksTableBody.innerHTML = '';
+            el.actionPhotoPreviewImg.classList.add('hidden'); 
+            el.noActionPhotoText.classList.remove('hidden');
+
+            el.actionButtons.classList.remove('hidden'); el.postSaveButtons.classList.add('hidden');
+            el.showUrgentActionBtn.classList.add('hidden');
+            
+            el.correctiveActionSection.classList.add('hidden');
+            
+            checkPreviewInputsAndToggleButtonState();
+            showSubView(null);
+            showView(el.welcomeSection);
+        }
+
+        // --- Media and Camera Management ---
+        async function openCamera(isActionCamera = false) {
+            const videoEl = isActionCamera ? document.getElementById('action-video') : el.video;
+            const viewToShow = isActionCamera ? el.actionCameraView : el.cameraView;
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                videoEl.srcObject = stream;
+                await videoEl.play();
+                showSubView(viewToShow);
+            } catch (err) {
+                console.error("getUserMedia error:", err);
+                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                    const detailedInstructions = `<p class="text-left">คุณได้ <strong>ปฏิเสธ</strong> การให้สิทธิ์เข้าถึงกล้องไว้ ทำให้แอปไม่สามารถทำงานได้</p><div class="text-left mt-4"><strong>วิธีแก้ไข:</strong><ol class="list-decimal list-inside mt-2 space-y-1"><li>กดที่ไอคอนรูปแม่กุญแจ (🔒) ที่อยู่ข้างๆ ที่อยู่เว็บ (URL) ด้านบน</li><li>ในเมนูที่ปรากฏขึ้นมา ให้หาหัวข้อ 'กล้อง' (Camera) แล้วเปลี่ยนจาก 'ปิดกั้น' (Block) เป็น 'อนุญาต' (Allow)</li><li>โหลดหน้านี้ซ้ำอีกครั้ง</li></ol></div>`;
+                    showModal("การเข้าถึงกล้องถูกปิดกั้น", detailedInstructions);
+                } else {
+                    showModal("เกิดข้อผิดพลาดกับกล้อง", `<p>ไม่สามารถเข้าถึงกล้องได้: ${err.message}</p>`);
+                }
+                resetForm(); // Go back to welcome screen on camera error
+            }
+        }
+
+        function stopCamera(isActionCamera) {
+            const videoEl = isActionCamera ? document.getElementById('action-video') : el.video;
+            if (videoEl.srcObject) {
+                videoEl.srcObject.getTracks().forEach(track => track.stop());
+            }
+        }
+
+        function captureImage(isActionCamera) {
+            const videoEl = isActionCamera ? document.getElementById('action-video') : el.video;
+            const canvas = document.createElement('canvas');
+            canvas.width = videoEl.videoWidth; canvas.height = videoEl.videoHeight;
+            canvas.getContext('2d').drawImage(videoEl, 0, 0);
+            canvas.toBlob(blob => {
+                stopCamera(isActionCamera);
+                if (isActionCamera) {
+                    currentActionImageBlob = blob;
+                    el.actionPhotoPreviewImg.src = URL.createObjectURL(blob);
+                    el.actionPhotoPreviewImg.classList.remove('hidden');
+                    el.noActionPhotoText.classList.add('hidden');
+                    showSubView(el.result);
+                } else {
+                    currentMediaBlob = blob;
+                    el.previewImage.src = URL.createObjectURL(blob);
+                    el.previewImage.classList.remove('hidden');
+                    showSubView(el.preview);
+                    checkPreviewInputsAndToggleButtonState();
+                }
+            }, 'image/jpeg');
+        }
+
+        // --- Media Compression and AI Analysis ---
+        function compressImage(blob, maxWidth = 1280, quality = 0.7) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.src = URL.createObjectURL(blob);
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const scale = Math.min(1, maxWidth / img.width);
+                    canvas.width = img.width * scale;
+                    canvas.height = img.height * scale;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    canvas.toBlob(resolve, 'image/jpeg', quality);
+                };
+                img.onerror = reject;
+            });
+        }
+
+        function blobToBase64(blob) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onloadend = () => resolve(reader.result.split(',')[1]); reader.onerror = reject; reader.readAsDataURL(blob); }); }
+
+        async function analyzeMedia() {
+            if (!checkPreviewInputsAndToggleButtonState()) {
+                showModal('ข้อมูลไม่ครบถ้วน', '<p>กรุณากรอกข้อมูลประเภทงานก่อนส่งเพื่อวิเคราะห์</p>');
+                return;
+            }
+            
+            const k1 = "AIzaSyDDIJC"; const k2 = "VMhfCZXauRy-"; const k3 = "3EbdwrdxS_"; const k4 = "RcREfs";
+            const apiKey = k1 + k2 + k3 + k4;
+            if (!currentMediaBlob) return;
+            showSubView(el.loader);
+            document.getElementById('loader-text').textContent = 'กำลังบีบอัดรูปภาพ...';
+            const compressedBlob = await compressImage(currentMediaBlob);
+            const prompt = `Analyze the provided image from a construction/industrial site for safety risks. Context: The type of work is "${el.workType.value}". For the "classification", use one of these categories if applicable: 'PPE (อุปกรณ์ป้องกันส่วนบุคคล)', 'Housekeeping (ความสะอาดและเป็นระเบียบ)', 'Work at Height (การทำงานที่สูง)', 'Lifting Operations (การยกของหนัก)', 'Traffic & Vehicle Safety (ความปลอดภัยของยานพาหนะ)', 'Fire Safety (ความปลอดภัยจากอัคคีภัย)', 'Chemical Safety (ความปลอดภัยของสารเคมี)', 'Tool & Equipment Safety (ความปลอดภัยของเครื่องมือ)', 'Permit to Work (ใบอนุญาตทำงาน - PTW)', 'Emergency Preparedness (การเตรียมพร้อมรับเหตุฉุกเฉิน)'. For "initial_action_suggestion", provide a simple, direct instruction for a worker on site. Crucially, if any workers/employees are visible in the image, the 'initial_action_suggestion' MUST include a check for correct Personal Protective Equipment (PPE) usage as a top priority. For example: 'หยุดทำงานและตรวจสอบการสวมใส่หมวกนิรภัยและรองเท้าเซฟตี้ทันที'. For the "event_type_suggestion" key, you MUST return a JSON array containing exactly ONE of the following three strings: "UA", "UC", or "Near Miss". For example: ["UA"]. Do not return any other text or format for this key. Return a valid JSON array of objects with keys: "risk", "risk_reasoning" (a short, simple explanation in Thai for a worker explaining why the risk is dangerous), "classification", "event_type_suggestion", "likelihood" (1-5), "severity" (1-5), "root_cause_category", "initial_action_suggestion", "preventive_action_suggestion". All text must be in Thai. If no risks are found, return an empty array [].`;
+            document.getElementById('loader-text').textContent = 'กำลังแปลงข้อมูลเพื่อส่งวิเคราะห์...';
+            const base64Image = await blobToBase64(compressedBlob);
+            el.analyzedImage.src = `data:image/jpeg;base64,${base64Image}`;
+            document.getElementById('loader-text').textContent = 'AI กำลังวิเคราะห์...';
+            callGeminiAPI([base64Image], apiKey, prompt);
+        }
+        
+        async function callGeminiAPI(base64Images, apiKey, prompt) {
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            const parts = [{ text: prompt }];
+            base64Images.forEach(imgData => { parts.push({ inlineData: { mimeType: "image/jpeg", data: imgData } }); });
+            const payload = { contents: [{ role: "user", parts: parts }], generationConfig: { responseMimeType: "application/json" } };
+            
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) {
+                    const errorBody = await response.text();
+                    throw new Error(`API Error ${response.status}: ${errorBody}`);
+                }
+                const result = await response.json();
+                const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!text) {
+                    console.error("ข้อผิดพลาด Gemini API: ไม่พบส่วนข้อความในการตอบกลับหรือการตอบกลับถูกบล็อก", result);
+                    throw new Error("AI ไม่สามารถประมวลผลรูปภาพได้ อาจเนื่องมาจากนโยบายความปลอดภัย");
+                }
+                const risksData = JSON.parse(text || '[]');
+                displayResults(risksData);
+            } catch (error) {
+                console.error("Gemini API Error:", error);
+                showModal("ข้อผิดพลาดในการวิเคราะห์", `<p>เกิดข้อผิดพลาดในการสื่อสารกับ AI: ${error.message}</p>`);
+                showSubView(el.preview);
+            }
+        }
+
+        function displayResults(risks) {
+            showSubView(el.result);
+            el.analyzedImage.classList.remove('hidden'); // Make the image visible
+
+            if (!risks || risks.length === 0) {
+                showModal("✅ ไม่พบความเสี่ยง", "<p>จากการวิเคราะห์ ไม่พบความเสี่ยงที่ชัดเจนในภาพถ่ายนี้</p>");
+                el.actionButtons.classList.add('hidden');
+                el.postSaveButtons.classList.remove('hidden');
+                el.showUrgentActionBtn.classList.add('hidden');
+                allRisksData = [];
+                // Even if no risks, show a basic report header
+                el.reportProjectName.textContent = el.projectName.value;
+                el.reportInspectorName.textContent = el.inspectorName.value;
+                el.reportDate.textContent = new Date().toLocaleString('th-TH');
+                el.reportEventType.textContent = 'ไม่พบเหตุการณ์';
+                el.risksTableBody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-gray-500">ไม่พบความเสี่ยง</td></tr>`;
+
+            } else {
+                el.actionButtons.classList.remove('hidden');
+                el.postSaveButtons.classList.add('hidden');
+                el.showUrgentActionBtn.classList.remove('hidden');
+                allRisksData = risks.map(r => ({...r, score: (r.likelihood || 1) * (r.severity || 1)})).sort((a, b) => b.score - a.score);
+                
+                const featuredRisk = allRisksData[0];
+                const suggestedEventType = (featuredRisk.event_type_suggestion && featuredRisk.event_type_suggestion.length > 0) ? featuredRisk.event_type_suggestion[0] : 'N/A';
+
+                // 1. Populate Report Header
+                el.reportProjectName.textContent = el.projectName.value;
+                el.reportInspectorName.textContent = el.inspectorName.value;
+                el.reportDate.textContent = new Date().toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
+                el.reportEventType.textContent = suggestedEventType;
+                el.reportStatus.value = 'Open';
+
+                // 2. Render Risks Table
+                renderRisksTable();
+
+                // 3. Show Corrective Action section and pre-select event type
+                el.correctiveActionSection.classList.remove('hidden');
+                document.querySelectorAll('input[name="event-type"]').forEach(radio => radio.checked = false);
+                const radioToCheck = document.querySelector(`input[name="event-type"][value="${suggestedEventType}"]`);
+                if (radioToCheck) radioToCheck.checked = true;
+
+                // 4. Show urgent action modal
+                showUrgentActionModal(featuredRisk.initial_action_suggestion, featuredRisk.risk_reasoning);
+            }
+        }
+        
+        function renderRisksTable() {
+            el.risksTableBody.innerHTML = '';
+            allRisksData.forEach((risk, index) => {
+                const levelName = riskMatrix.getRiskLevel(risk);
+                const levelInfo = riskMatrix.levels[levelName];
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-4 py-3"><div class="text-sm text-gray-900">${risk.risk}</div></td>
+                    <td class="px-4 py-3"><div class="text-sm text-gray-700">${risk.classification}</div></td>
+                    <td class="px-4 py-3"><div class="text-sm text-gray-700">${risk.preventive_action_suggestion || '-'}</div></td>
+                `;
+                el.risksTableBody.appendChild(row);
+            });
+        }
+
+        function showUrgentActionModal(actionText, reasonText) {
+            const topRisk = allRisksData[0];
+
+            // If user has already edited, show their edits. Otherwise, show AI suggestion.
+            el.modal.urgentReasonEdit.value = topRisk.risk_reasoning || reasonText || 'มีความเสี่ยงที่ต้องจัดการทันที';
+            
+            if (topRisk.urgent_action_items_full_text) {
+                 el.modal.urgentActionEdit.value = topRisk.urgent_action_items_full_text;
+            } else {
+                 const notificationText = "แจ้งให้หัวหน้างานหรือ จป. ทราบทันที";
+                 const actionItems = [actionText || 'ไม่มีข้อมูล', notificationText].join('\n');
+                 el.modal.urgentActionEdit.value = actionItems;
+            }
+        
+            // Make the modal visible first
+            el.modal.urgentAction.classList.remove('hidden');
+            el.modal.urgentAction.classList.add('flex');
+
+            // Then, auto-resize textareas after a short delay to ensure rendering
+            setTimeout(() => {
+                autoResizeTextarea(el.modal.urgentReasonEdit);
+                autoResizeTextarea(el.modal.urgentActionEdit);
+            }, 10);
+        }
+
+        function saveUrgentActionEdits() {
+            if (!allRisksData || allRisksData.length === 0) {
+                hideModal(el.modal.urgentAction);
+                return;
+            }
+
+            const updatedReason = el.modal.urgentReasonEdit.value.trim();
+            const updatedActions = el.modal.urgentActionEdit.value.trim();
+            
+            // Update the top risk data directly
+            const topRisk = allRisksData[0];
+            topRisk.risk_reasoning = updatedReason;
+            
+            // Store the full edited text to reconstruct the list later
+            topRisk.urgent_action_items_full_text = updatedActions; 
+            
+            // Also update the single initial action suggestion based on the first line
+            topRisk.initial_action_suggestion = updatedActions.split('\n')[0] || ''; 
+
+            hideModal(el.modal.urgentAction);
+        }
+
+        function openEditRiskModal(index) {
+            editingRiskIndex = parseInt(index, 10);
+            const risk = allRisksData[editingRiskIndex];
+            el.modal.editDesc.textContent = risk.risk;
+            el.modal.editL.value = risk.likelihood;
+            el.modal.editS.value = risk.severity;
+            el.modal.editReason.value = risk.edit_reason || '';
+            el.modal.editRisk.classList.remove('hidden'); el.modal.editRisk.classList.add('flex');
+        }
+
+        function saveRiskEdit() {
+            const newL = parseInt(el.modal.editL.value), newS = parseInt(el.modal.editS.value);
+            const reason = el.modal.editReason.value.trim();
+            if (isNaN(newL) || newL < 1 || newL > 5 || isNaN(newS) || newS < 1 || newS > 5) { showModal('ข้อมูลไม่ถูกต้อง', '<p>Likelihood และ Severity ต้องเป็น 1-5</p>'); return; }
+            if (!reason) { showModal('ต้องการเหตุผล', '<p>กรุณาระบุเหตุผลในการแก้ไข</p>'); return; }
+            const risk = allRisksData[editingRiskIndex];
+            risk.likelihood = newL; risk.severity = newS; risk.score = newL * newS;
+            risk.edit_reason = reason; risk.user_edited = true;
+            allRisksData.sort((a, b) => b.score - a.score);
+            renderRisksTable(); 
+            // Also update summary card if the top risk changes
+            // For simplicity, we are not re-evaluating the top risk after a single edit in this version.
+            hideModal(el.modal.editRisk);
+        }
+
+        // --- Data Saving and Upload ---
+        async function uploadImageToStorage(blob, path) {
+            if (!storage || !blob) return null;
+            try {
+                const compressedBlob = await compressImage(blob, 1920, 0.8);
+                const storageRef = ref(storage, path);
+                const snapshot = await uploadBytes(storageRef, compressedBlob);
+                return await getDownloadURL(snapshot.ref);
+            } catch (error) {
+                console.error(`Upload to path ${path} failed:`, error);
+                return null;
+            }
+        }
+
+        async function saveReport() {
+            if (!userId) { showModal("ข้อผิดพลาด", "<p>ไม่สามารถระบุตัวตนผู้ใช้ได้ กรุณาลองใหม่อีกครั้ง</p>"); return; }
+            if (allRisksData.length > 0 && !el.actionDescription.value.trim()) { 
+                showModal('ข้อมูลไม่ครบถ้วน', '<p>กรุณากรอก "รายละเอียดการแก้ไข" ก่อนทำการบันทึก</p>');
+                return; 
+            }
+             const selectedEventType = document.querySelector('input[name="event-type"]:checked');
+             if (allRisksData.length > 0 && !selectedEventType) {
+                showModal('ข้อมูลไม่ครบถ้วน', '<p>กรุณา "ยืนยันประเภทของเหตุการณ์" ก่อนทำการบันทึก</p>');
+                return;
+            }
+
+            el.saveReportBtn.disabled = true; el.saveReportBtn.textContent = 'กำลังบันทึก...';
+            try {
+                const analyzedImageSrc = el.analyzedImage.src;
+                let riskBlobForUpload = currentMediaBlob;
+                if (analyzedImageSrc && analyzedImageSrc.startsWith('data:image')) {
+                    const response = await fetch(analyzedImageSrc);
+                    riskBlobForUpload = await response.blob();
+                }
+                const timestamp = Date.now();
+                const riskMediaPath = `artifacts/${appId}/public/images/risk_${timestamp}.jpg`;
+                const actionImagePath = `artifacts/${appId}/public/images/action_${timestamp}.jpg`;
+                const [riskMediaURL, actionImageURL] = await Promise.all([
+                    uploadImageToStorage(riskBlobForUpload, riskMediaPath),
+                    allRisksData.length > 0 ? uploadImageToStorage(currentActionImageBlob, actionImagePath) : Promise.resolve(null)
+                ]);
+                if (!riskMediaURL) throw new Error("การอัปโหลดสื่อความเสี่ยงล้มเหลว");
+                
+                const topRisk = allRisksData.length > 0 ? allRisksData[0] : null;
+                const notificationText = "แจ้งให้หัวหน้างานหรือ จป. ทราบทันที";
+
+                const reportData = {
+                    inspectorName: el.inspectorName.value, projectName: el.projectName.value, workType: el.workType.value,
+                    eventType: selectedEventType ? selectedEventType.value : null,
+                    actionDescription: el.actionDescription.value.trim(),
+                    createdAt: serverTimestamp(), riskMediaURL, mediaType: 'image', actionImageURL,
+                    location: null, status: el.reportStatus.value,
+                    dueDate: null, risks: allRisksData, 
+                    topRisk: topRisk, 
+                    immediateAction: topRisk ? topRisk.initial_action_suggestion : null,
+                    // เพิ่มข้อมูลจาก Pop-up สำหรับ Dashboard โดยเฉพาะ
+                    urgentActionReason: topRisk ? topRisk.risk_reasoning : null,
+                    urgentActionItems: topRisk ? (topRisk.urgent_action_items_full_text || [topRisk.initial_action_suggestion, notificationText].join('\n')).split('\n').filter(Boolean) : [],
+                    userId
+                };
+                await addDoc(collection(db, `artifacts/${appId}/public/data/reports`), reportData);
+                showModal('บันทึกสำเร็จ', `<p>รายงานของคุณถูกบันทึกเรียบร้อยแล้ว</p>`);
+                el.actionButtons.classList.add('hidden');
+                el.postSaveButtons.classList.remove('hidden');
+            } catch (error) {
+                console.error("เกิดข้อผิดพลาดในการบันทึกรายงาน: ", error);
+                if (error.code === 'storage/unauthorized') {
+                     showModal("เกิดข้อผิดพลาด: ไม่มีสิทธิ์", "<p>แอปไม่มีสิทธิ์ในการอัปโหลดไฟล์ ซึ่งมักเกิดจากการเชื่อมต่อกับโปรเจกต์ Firebase ที่ไม่ถูกต้อง กรุณาตรวจสอบการตั้งค่าของแพลตฟอร์มนี้เพื่อให้แน่ใจว่าได้เชื่อมต่อกับโปรเจกต์ Firebase ล่าสุดที่มีการตั้งค่า Rules ถูกต้องแล้ว</p>");
+                } else if (error.code === 'storage/retry-limit-exceeded') {
+                    showModal("เกิดข้อผิดพลาด: การเชื่อมต่อล้มเหลว", "<p>ไม่สามารถอัปโหลดไฟล์ได้เนื่องจากการเชื่อมต่อไม่เสถียร กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณแล้วลองใหม่อีกครั้ง</p>");
+                } else {
+                    showModal("เกิดข้อผิดพลาด", `<p>ไม่สามารถบันทึกรายงานได้: ${error.message}</p>`);
+                }
+            } finally {
+                el.saveReportBtn.disabled = false; el.saveReportBtn.textContent = 'ยืนยันและบันทึก';
+            }
+        }
+        
+        async function fetchProjects() {
+            const projectSelects = [el.projectName, el.modal.regProjectName];
+            try {
+                const projectsCol = collection(db, 'artifacts/risk-hunter-app-official/public/data/projects');
+                const projectSnapshot = await getDocs(projectsCol);
+
+                projectSelects.forEach(select => select.innerHTML = '<option value="" disabled selected>กรุณาเลือกโครงการ/ไซต์งาน</option>');
+
+                if (projectSnapshot.empty) {
+                     projectSelects.forEach(select => select.innerHTML += '<option value="" disabled>ไม่พบโครงการที่กำหนด</option>');
+                    return;
+                }
+
+                const projectOptions = [];
+                projectSnapshot.forEach((doc) => {
+                    const project = doc.data();
+                    if (project.name) {
+                        const option = document.createElement('option');
+                        option.value = project.name;
+                        option.textContent = project.name;
+                        projectOptions.push(option);
+                    }
+                });
+                
+                projectSelects.forEach(select => {
+                    projectOptions.forEach(option => select.appendChild(option.cloneNode(true)));
+                });
+
+            } catch (error) {
+                console.error("เกิดข้อผิดพลาดในการดึงข้อมูลโครงการ: ", error);
+                projectSelects.forEach(select => select.innerHTML = '<option value="" disabled selected>เกิดข้อผิดพลาดในการโหลดโครงการ</option>');
+            }
+        }
+
+        function formatAsNumberedList(title, text, titleClasses = 'font-bold', listClasses = 'list-decimal list-inside pl-2 mt-1 space-y-1') {
+            const items = text.split('\n').map(s => s.trim()).filter(Boolean);
+            if (items.length === 0) return '';
+            let html = `<p class="${titleClasses}">${title}:</p><ol class="${listClasses}">`;
+            items.forEach(item => { html += `<li>${item}</li>`; });
+            html += `</ol>`;
+            return html;
+        }
+    </script>
+</body>
+</html>
